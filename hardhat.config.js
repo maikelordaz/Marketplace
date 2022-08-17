@@ -44,7 +44,7 @@ module.exports = {
         deployer: {
             default: 0,
         },
-        player: {
+        Alice: {
             default: 1,
         },
     },

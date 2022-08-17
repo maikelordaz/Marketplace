@@ -15,7 +15,7 @@ const { developmentChains } = require("../../helper-hardhat-config")
               // Get the accounts
               accounts = await ethers.getSigners()
               deployer = accounts[0]
-              const Alice = accounts[1]
+              Alice = accounts[1]
               // Deploy contracts
               await deployments.fixture(["all"])
               nftMarketplaceContract = await ethers.getContract("NftMarketplace")
@@ -85,6 +85,34 @@ const { developmentChains } = require("../../helper-hardhat-config")
                   await expect(
                       nftMarketplace.listItem(basicNftContract.address, TOKEN_ID, PRICE)
                   ).to.be.revertedWith(error)
+              })
+          })
+
+          describe("Buy item", function () {
+              it("only allow to buy items if the payment is correct", async function () {
+                  await nftMarketplace.listItem(basicNftContract.address, TOKEN_ID, PRICE)
+                  await expect(
+                      nftMarketplace.buyItem(basicNftContract.address, TOKEN_ID)
+                  ).to.be.revertedWith("PriceNotMet")
+              })
+
+              it("only allow to buy items if the payment is correct", async function () {
+                  await expect(
+                      nftMarketplace.buyItem(basicNftContract.address, TOKEN_ID)
+                  ).to.be.revertedWith("NftMarketplace__NotListed")
+              })
+
+              it("emits an event when an item is bought", async function () {
+                  await nftMarketplace.listItem(basicNftContract.address, TOKEN_ID, PRICE)
+                  expect(
+                      await nftMarketplaceAlice.buyItem(basicNftContract.address, TOKEN_ID, {
+                          value: PRICE,
+                      })
+                  ).to.emit("ItemBought")
+                  const newOwner = await basicNftContract.ownerOf(TOKEN_ID)
+                  const deployerBalance = await nftMarketplace.getProceeds(deployer.address)
+                  assert(newOwner.toString() == Alice.address)
+                  assert(deployerBalance.toString() == PRICE.toString())
               })
           })
       })
