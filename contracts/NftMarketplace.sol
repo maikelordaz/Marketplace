@@ -36,6 +36,8 @@ contract NftMarketplace {
         uint256 indexed tokenId,
         uint256 price
     );
+
+    event ItemCanceled(address indexed seller, address indexed nftAddress, uint256 indexed tokenId);
     // MAPPINGS
     /*
      * Podria hacer dos mappings para este, uno
@@ -113,6 +115,21 @@ contract NftMarketplace {
     }
 
     /**
+     * @notice a method to cancel listed items
+     * @dev only call by the owner
+     * @param nftAddress the contract address of the item to cancel
+     * @param tokenId the Id of the NFT
+     */
+    function cancelListing(address nftAddress, uint256 tokenId)
+        external
+        isOwner(nftAddress, tokenId, msg.sender)
+        isListed(nftAddress, tokenId)
+    {
+        delete (s_listings[nftAddress][tokenId]);
+        emit ItemCanceled(msg.sender, nftAddress, tokenId);
+    }
+
+    /**
      * @notice A method to buy listed items
      * @param nftAddress the contract address of the item to buy
      * @param tokenId the Id of the NFT
@@ -133,6 +150,10 @@ contract NftMarketplace {
     }
 
     // PURE / VIEW FUNCTIONS
+    /**
+     * @notice a getter function
+     * @return A listing object that contains, price of the item and the seller
+     */
     function getListing(address nftAddress, uint256 tokenId)
         external
         view
@@ -141,6 +162,10 @@ contract NftMarketplace {
         return s_listings[nftAddress][tokenId];
     }
 
+    /**
+     * @notice a getter function
+     * @return The amount the seller can withdraw
+     */
     function getProceeds(address seller) external view returns (uint256) {
         return s_proceeds[seller];
     }
