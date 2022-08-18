@@ -1,6 +1,5 @@
 const { assert, expect } = require("chai")
 const { network, deployments, ethers } = require("hardhat")
-const { isCallTrace } = require("hardhat/internal/hardhat-network/stack-traces/message-trace")
 const { developmentChains } = require("../../helper-hardhat-config")
 
 !developmentChains.includes(network.name)
@@ -89,6 +88,60 @@ const { developmentChains } = require("../../helper-hardhat-config")
                   })
               })
 
+              describe("Update listing function", function () {
+                  it("Revert if there is no price included", async function () {
+                      await nftMarketplace.listItem(basicNftContract.address, TOKEN_ID, PRICE)
+                      await expect(
+                          nftMarketplace.updateListing(basicNftContract.address, TOKEN_ID, 0)
+                      ).to.be.revertedWith("NftMarketplace__PriceMustBeAboveZero")
+                  })
+
+                  it("Emit an event when the listed item is updated", async function () {
+                      await nftMarketplace.listItem(basicNftContract.address, TOKEN_ID, PRICE)
+                      const NEW_PRICE = ethers.utils.parseEther("0.2")
+                      expect(
+                          nftMarketplace.updateListing(
+                              basicNftContract.address,
+                              TOKEN_ID,
+                              NEW_PRICE
+                          )
+                      ).to.emit("ItemListed")
+                  })
+
+                  it("only allow owners to update the list", async function () {
+                      await nftMarketplace.listItem(basicNftContract.address, TOKEN_ID, PRICE)
+                      const NEW_PRICE = ethers.utils.parseEther("0.2")
+                      await expect(
+                          nftMarketplaceAlice.updateListing(
+                              basicNftContract.address,
+                              TOKEN_ID,
+                              NEW_PRICE
+                          )
+                      ).to.be.revertedWith("NftMarketplace__NotOwner")
+                  })
+
+                  it("only allow to update items that are already listed", async function () {
+                      await expect(
+                          nftMarketplace.updateListing(basicNftContract.address, TOKEN_ID, PRICE)
+                      ).to.be.revertedWith("NftMarketplace__NotListed")
+                  })
+
+                  it("Update the price", async function () {
+                      const NEW_PRICE = ethers.utils.parseEther("0.2")
+                      await nftMarketplace.listItem(basicNftContract.address, TOKEN_ID, PRICE)
+                      await nftMarketplace.updateListing(
+                          basicNftContract.address,
+                          TOKEN_ID,
+                          NEW_PRICE
+                      )
+                      const listing = await nftMarketplace.getListing(
+                          basicNftContract.address,
+                          TOKEN_ID
+                      )
+                      assert(listing.price.toString() == NEW_PRICE.toString())
+                  })
+              })
+
               describe("Cancel item function", function () {
                   it("Revert if it is not listed", async function () {
                       await expect(
@@ -141,6 +194,34 @@ const { developmentChains } = require("../../helper-hardhat-config")
                       const deployerBalance = await nftMarketplace.getProceeds(deployer.address)
                       assert(newOwner.toString() == Alice.address)
                       assert(deployerBalance.toString() == PRICE.toString())
+                  })
+              })
+
+              describe("Withdraw proceeds function", function () {
+                  it("Revert if there is no proceeds", async function () {
+                      await expect(nftMarketplace.withdrawProceeds()).to.be.revertedWith(
+                          "NftMarketplace__NoProceeds"
+                      )
+                  })
+
+                  it("Withdraw the proceeds", async function () {
+                      await nftMarketplace.listItem(basicNftContract.address, TOKEN_ID, PRICE)
+                      await nftMarketplaceAlice.buyItem(basicNftContract.address, TOKEN_ID, {
+                          value: PRICE,
+                      })
+                      const proceedsBefore = await nftMarketplace.getProceeds(deployer.address)
+                      const balanceBefore = await deployer.getBalance()
+                      const tx = await nftMarketplace.withdrawProceeds()
+                      const txReceipt = await tx.wait(1)
+                      const { gasUsed, effectiveGasPrice } = txReceipt
+                      const gasCost = gasUsed.mul(effectiveGasPrice)
+                      const proceedsAfter = await nftMarketplace.getProceeds(deployer.address)
+                      const balanceAfter = await deployer.getBalance()
+                      assert(proceedsAfter.toString() == "0")
+                      assert(
+                          balanceAfter.add(gasCost).toString() ==
+                              proceedsBefore.add(balanceBefore).toString()
+                      )
                   })
               })
           })

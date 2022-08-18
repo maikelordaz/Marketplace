@@ -3,6 +3,7 @@
 pragma solidity ^0.8.7;
 
 // IMPORTS CONTRACTS
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 // IMPORTS INTERFACES
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 // IMPORTS LIBRARIES
@@ -13,9 +14,11 @@ error NftMarketplace__AlreadyListed(address nftAddress, uint256 tokenId);
 error NftMarketplace__NotOwner();
 error NftMarketplace__PriceNotMet(address nftAddress, uint256 tokenId, uint256 price);
 error NftMarketplace__NotListed(address nftAddress, uint256 tokenId);
+error NftMarketplace__NoProceeds();
+error NftMarketplace__TransferFailed();
 
 // CONTRACT
-contract NftMarketplace {
+contract NftMarketplace is ReentrancyGuard {
     // STATE VARIABLES
     struct Listing {
         uint256 price;
@@ -115,6 +118,25 @@ contract NftMarketplace {
     }
 
     /**
+     * @notice A method to update listed item price
+     * @dev It works like the listItem function
+     * @param nftAddress the contract address of the item to list
+     * @param tokenId the Id of the NFT
+     * @param newPrice the sell price
+     */
+    function updateListing(
+        address nftAddress,
+        uint256 tokenId,
+        uint256 newPrice
+    ) external nonReentrant isListed(nftAddress, tokenId) isOwner(nftAddress, tokenId, msg.sender) {
+        if (newPrice <= 0) {
+            revert NftMarketplace__PriceMustBeAboveZero();
+        }
+        s_listings[nftAddress][tokenId].price = newPrice;
+        emit ItemListed(msg.sender, nftAddress, tokenId, newPrice);
+    }
+
+    /**
      * @notice a method to cancel listed items
      * @dev only call by the owner
      * @param nftAddress the contract address of the item to cancel
@@ -138,6 +160,7 @@ contract NftMarketplace {
         external
         payable
         isListed(nftAddress, tokenId)
+        nonReentrant
     {
         Listing memory listing = s_listings[nftAddress][tokenId];
         if (msg.value < listing.price) {
@@ -147,6 +170,21 @@ contract NftMarketplace {
         delete (s_listings[nftAddress][tokenId]);
         IERC721(nftAddress).safeTransferFrom(listing.seller, msg.sender, tokenId);
         emit ItemBought(msg.sender, nftAddress, tokenId, listing.price);
+    }
+
+    /**
+     * @notice A method to allow users to withdraw their proceeds
+     */
+    function withdrawProceeds() external {
+        uint256 proceeds = s_proceeds[msg.sender];
+        if (proceeds <= 0) {
+            revert NftMarketplace__NoProceeds();
+        }
+        s_proceeds[msg.sender] = 0;
+        (bool success, ) = payable(msg.sender).call{value: proceeds}("");
+        if (!success) {
+            revert NftMarketplace__NoProceeds();
+        }
     }
 
     // PURE / VIEW FUNCTIONS
