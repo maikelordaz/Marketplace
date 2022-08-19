@@ -2,7 +2,7 @@ const { ethers } = require("hardhat")
 
 const PRICE = ethers.utils.parseEther("0.1")
 
-async function mint() {
+async function mintAndList() {
     const nftMarketplace = await ethers.getContract("NftMarketplace")
     const basicNft = await ethers.getContract("BasicNft")
     console.log("Minting NFT...")
@@ -20,7 +20,7 @@ async function mint() {
     console.log("NFT listed on marketplace!")
 }
 
-mint()
+mintAndList()
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error)
