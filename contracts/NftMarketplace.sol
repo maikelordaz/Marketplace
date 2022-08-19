@@ -42,21 +42,7 @@ contract NftMarketplace is ReentrancyGuard {
 
     event ItemCanceled(address indexed seller, address indexed nftAddress, uint256 indexed tokenId);
     // MAPPINGS
-    /*
-     * Podria hacer dos mappings para este, uno
-     * Nft Address -> tokenId -> price
-     * y otro
-     * Nft Address -> tokenId -> seller
-     * Pero es mejor crear un struct nuevo y hacer un solo mapping
-     * Nft Address -> tokenId -> Estructura
-     */
     mapping(address => mapping(uint256 => Listing)) private s_listings;
-    /*
-     * Address del vendedor -> ganancias acumiuladas
-     * Es mejor decirle al vendedor cuanto tiene acumulado y que el decida cuando retirar
-     * mediante una funcion especifica. Así toda la responsabilidad del tramite queda en el
-     * y no en mi
-     */
     mapping(address => uint256) private s_proceeds;
 
     // MODIFIERS
