@@ -11,7 +11,7 @@ async function mintAndList() {
     const tokenId = mintTxReceipt.events[0].args.tokenId
     console.log(`Minted NFT, token ID: ${tokenId}`)
     console.log("Approving NFT marketplace")
-    const approvalTx = await basicNft.appove(nftMarketplace.address, tokenId)
+    const approvalTx = await basicNft.approve(nftMarketplace.address, tokenId)
     await approvalTx.wait(1)
     console.log("NFT marketplace approved")
     console.log("Listing NFT...")
