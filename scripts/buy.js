@@ -1,4 +1,5 @@
-const { ethers } = require("hardhat")
+const { ethers, network } = require("hardhat")
+const { moveBlocks } = require("../utils/move-blocks")
 
 const TOKEN_ID = 0
 
@@ -10,7 +11,11 @@ async function buy() {
     console.log("Buying NFT...")
     const buyTx = await nftMarketplace.buyItem(basicNft.address, TOKEN_ID, { value: price })
     await buyTx.wait(1)
-    console.log("NFT buyed!")
+    console.log("--------------- NFT buyed! ---------------")
+
+    if ((network.config.chainId = "31337")) {
+        await moveBlocks(2, (sleepAmount = 1000))
+    }
 }
 
 buy()
