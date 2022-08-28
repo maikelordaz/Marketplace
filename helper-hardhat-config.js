@@ -30,7 +30,7 @@ const VERIFICATION_BLOCK_CONFIRMATIONS = 6
 const frontEndContractsFile = "../nexjs-nft-marketplace-moralis/constants/networkMapping.json"
 //const frontEndContractsFile2 =
 //    "../nextjs-nft-marketplace-thegraph-fcc/constants/networkMapping.json"
-//const frontEndAbiLocation = "../nextjs-nft-marketplace-moralis-fcc/constants/"
+const frontEndAbiLocation = "../nexjs-nft-marketplace-moralis/constants/"
 //const frontEndAbiLocation2 = "../nextjs-nft-marketplace-thegraph-fcc/constants/"
 
 module.exports = {
@@ -39,6 +39,6 @@ module.exports = {
     VERIFICATION_BLOCK_CONFIRMATIONS,
     frontEndContractsFile,
     //frontEndContractsFile2,
-    //frontEndAbiLocation,
+    frontEndAbiLocation,
     //frontEndAbiLocation2,
 }
