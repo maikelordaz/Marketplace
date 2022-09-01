@@ -1,5 +1,6 @@
 {
   "name": "NFT-Marketplace",
+  "author": "Maikel Ordaz",
   "version": "1.0.0",
   "license": "MIT",
   "devDependencies": {
