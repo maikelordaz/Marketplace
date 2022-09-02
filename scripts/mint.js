@@ -9,7 +9,7 @@ async function mint() {
     const tokenId = mintTxReceipt.events[0].args.tokenId
     console.log(`--------------- Minted NFT, token ID: ${tokenId} ---------------`)
 
-    if ((network.config.chainId = "31337")) {
+    if (network.config.chainId == "31337") {
         await moveBlocks(2, (sleepAmount = 1000))
     }
 }

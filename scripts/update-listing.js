@@ -12,7 +12,7 @@ async function updateListing() {
     await updateTx.wait(1)
     console.log("--------------- NFT price updated! ---------------")
 
-    if ((network.config.chainId = "31337")) {
+    if (network.config.chainId == "31337") {
         await moveBlocks(2, (sleepAmount = 1000))
     }
 }

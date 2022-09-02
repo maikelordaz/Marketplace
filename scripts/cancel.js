@@ -11,7 +11,7 @@ async function cancel() {
     await cancelTx.wait(1)
     console.log("--------------- NFT cancelled! ---------------")
 
-    if ((network.config.chainId = "31337")) {
+    if (network.config.chainId == "31337") {
         await moveBlocks(2, (sleepAmount = 1000))
     }
 }

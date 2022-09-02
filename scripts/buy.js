@@ -13,7 +13,7 @@ async function buy() {
     await buyTx.wait(1)
     console.log("--------------- NFT buyed! ---------------")
 
-    if ((network.config.chainId = "31337")) {
+    if (network.config.chainId == "31337") {
         await moveBlocks(2, (sleepAmount = 1000))
     }
 }

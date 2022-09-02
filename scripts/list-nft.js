@@ -16,7 +16,7 @@ async function listNft() {
     await listTx.wait(1)
     console.log("--------------- NFT listed on marketplace! ---------------")
 
-    if ((network.config.chainId = "31337")) {
+    if (network.config.chainId == "31337") {
         await moveBlocks(2, (sleepAmount = 1000))
     }
 }
