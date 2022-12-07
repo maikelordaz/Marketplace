@@ -26,8 +26,8 @@
     "test": "yarn hardhat test",
     "coverage": "yarn hardhat coverage",
     "deploy": "yarn hardhat deploy",
-    "rinkeby": "yarn hardhat deploy --network rinkeby",
-    "staging": "yarn hardhat test --network rinkeby",
+    "goerli": "yarn hardhat deploy --network goerli",
+    "mumbai": "yarn hardhat deploy --network mumbai",
     "format": "yarn prettier --write ."
   }
 }
